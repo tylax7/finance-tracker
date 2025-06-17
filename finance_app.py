@@ -87,8 +87,7 @@ if uploaded_file:
             dashboard_text_rows = df_dashboard.astype(str)
             dashboard_matches = dashboard_text_rows[dashboard_text_rows.apply(
     lambda row: row.str.contains(r"\d", regex=True), axis=1
-)]
-
+                
             )]
             dashboard_context = dashboard_matches.to_string(index=False, header=False)
 
