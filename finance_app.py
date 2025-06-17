@@ -3,6 +3,7 @@ import streamlit as st
 import pandas as pd
 import datetime
 import os
+import openai
 
 st.set_page_config(page_title="Personal Finance Assistant", layout="centered")
 st.title("💰 Personal Finance Assistant")
