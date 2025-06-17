@@ -3,7 +3,6 @@ import streamlit as st
 import pandas as pd
 import datetime
 import os
-import openai
 
 st.set_page_config(page_title="Personal Finance Assistant", layout="centered")
 st.title("💰 Personal Finance Assistant")
@@ -72,23 +71,16 @@ if uploaded_file:
         st.write(f"**Total Paid to Nanny:** ${nanny_expenses['Amount'].sum():,.2f}")
     else:
         st.info("No nanny-related expenses found yet.")
-        import os
-import openai
 
-# Load OpenAI key securely from Streamlit secrets
-openai.api_key = os.getenv("OPENAI_API_KEY")
+    # Natural Language Q&A Section
+    st.header("🤖 Ask a Question About Your Finances")
+    question = st.text_input("Ask something like 'How much did we spend on groceries last month?'")
 
-st.header("🤖 Ask a Question About Your Finances")
+    if question and not df_expense.empty:
+        with st.spinner("Thinking..."):
+            context_data = df_expense[['Date', 'Type', 'Amount']].dropna().head(50).to_csv(index=False)
 
-question = st.text_input("Ask something like 'How much did we spend on groceries last month?'")
-
-if question and not df_expense.empty:
-    with st.spinner("Thinking..."):
-
-        # Optional: limit to 50 rows to keep it snappy
-        context_data = df_expense[['Date', 'Type', 'Amount']].dropna().head(50).to_csv(index=False)
-
-        prompt = f"""
+            prompt = f"""
 You are a helpful finance assistant. Given this table of transactions:
 
 {context_data}
@@ -96,29 +88,16 @@ You are a helpful finance assistant. Given this table of transactions:
 Answer the user's question: "{question}"
 """
 
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+            try:
+                client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+                response = client.chat.completions.create(
+                    model="gpt-3.5-turbo",
+                    messages=[{"role": "user", "content": prompt}],
+                    temperature=0
+                )
+                answer = response.choices[0].message.content.strip()
+                st.markdown("**Answer:**")
+                st.write(answer)
 
-if question and not df_expense.empty:
-    with st.spinner("Thinking..."):
-        context_data = df_expense[['Date', 'Type', 'Amount']].dropna().head(50).to_csv(index=False)
-
-        prompt = f"""
-You are a helpful finance assistant. Given this table of transactions:
-
-{context_data}
-
-Answer the user's question: "{question}"
-"""
-
-        try:
-            client.chat.completions.create(
-                model="gpt-3.5-turbo",
-                messages=[{"role": "user", "content": prompt}],
-                temperature=0
-            )
-            answer = response.choices[0].message.content.strip()
-            st.markdown("**Answer:**")
-            st.write(answer)
-
-        except Exception as e:
-            st.error(f"Error from OpenAI: {e}")
+            except Exception as e:
+                st.error(f"Error from OpenAI: {e}")
