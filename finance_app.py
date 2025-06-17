@@ -96,8 +96,6 @@ You are a helpful finance assistant. Given this table of transactions:
 Answer the user's question: "{question}"
 """
 
-        try:
-        
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 if question and not df_expense.empty:
