@@ -3,7 +3,6 @@ import streamlit as st
 import pandas as pd
 import datetime
 import os
-import openai
 
 st.set_page_config(page_title="Personal Finance Assistant", layout="centered")
 st.title("💰 Personal Finance Assistant")
@@ -114,7 +113,7 @@ Answer the user's question: "{question}"
 """
 
         try:
-            response = client.chat.completions.create(
+            client.chat.completions.create(
                 model="gpt-3.5-turbo",
                 messages=[{"role": "user", "content": prompt}],
                 temperature=0
