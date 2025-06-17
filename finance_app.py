@@ -73,19 +73,34 @@ if uploaded_file:
         st.info("No nanny-related expenses found yet.")
 
     # Natural Language Q&A Section
+        # 🤖 Natural Language Q&A Section (with Dashboard context)
     st.header("🤖 Ask a Question About Your Finances")
     question = st.text_input("Ask something like 'How much did we spend on groceries last month?'")
 
     if question and not df_expense.empty:
         with st.spinner("Thinking..."):
+
+            # Limit to top 50 rows from expense sheet for token efficiency
             context_data = df_expense[['Date', 'Type', 'Amount']].dropna().head(50).to_csv(index=False)
 
-            prompt = f"""
-You are a helpful finance assistant. Given this table of transactions:
+            # Extract dashboard rows with potential budget/nanny references
+            dashboard_text_rows = df_dashboard.astype(str)
+            dashboard_matches = dashboard_text_rows[dashboard_text_rows.apply(
+                lambda row: row.str.contains("nanny|2026|budget", case=False).any(), axis=1
+            )]
+            dashboard_context = dashboard_matches.to_string(index=False, header=False)
 
+            # Construct full prompt
+            prompt = f"""
+You are a helpful finance assistant. The user has provided two tables.
+
+Expense Table (Date, Type, Amount):
 {context_data}
 
-Answer the user's question: "{question}"
+Dashboard Table:
+{dashboard_context}
+
+Answer the user's question: \"{question}\"
 """
 
             try:
