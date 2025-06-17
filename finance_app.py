@@ -69,3 +69,40 @@ if uploaded_file:
         st.write(f"**Total Paid to Nanny:** ${nanny_expenses['Amount'].sum():,.2f}")
     else:
         st.info("No nanny-related expenses found yet.")
+        import os
+import openai
+
+# Load OpenAI key securely from Streamlit secrets
+openai.api_key = os.getenv("OPENAI_API_KEY")
+
+st.header("🤖 Ask a Question About Your Finances")
+
+question = st.text_input("Ask something like 'How much did we spend on groceries last month?'")
+
+if question and not df_expense.empty:
+    with st.spinner("Thinking..."):
+
+        # Optional: limit to 50 rows to keep it snappy
+        context_data = df_expense[['Date', 'Type', 'Amount']].dropna().head(50).to_csv(index=False)
+
+        prompt = f"""
+You are a helpful finance assistant. Given this table of transactions:
+
+{context_data}
+
+Answer the user's question: "{question}"
+"""
+
+        try:
+            response = openai.ChatCompletion.create(
+                model="gpt-3.5-turbo",
+                messages=[{"role": "user", "content": prompt}],
+                temperature=0
+            )
+            st.markdown("**Answer:**")
+            st.write(response.choices[0].message.content.strip())
+
+        except Exception as e:
+            st.error(f"Error from OpenAI: {e}")
+Add natural language Q&A using OpenAI
+
