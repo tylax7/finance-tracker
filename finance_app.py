@@ -104,5 +104,6 @@ Answer the user's question: "{question}"
 
         except Exception as e:
             st.error(f"Error from OpenAI: {e}")
+
 Add natural language Q&A using OpenAI
 
