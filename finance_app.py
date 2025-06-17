@@ -97,8 +97,7 @@ Answer the user's question: "{question}"
 """
 
         try:
-            response = from openai import OpenAI
-
+        
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 if question and not df_expense.empty:
