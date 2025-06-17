@@ -1,3 +1,4 @@
+from openai import OpenAI
 import streamlit as st
 import pandas as pd
 import datetime
@@ -96,13 +97,31 @@ Answer the user's question: "{question}"
 """
 
         try:
-            response = openai.ChatCompletion.create(
+            response = from openai import OpenAI
+
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
+if question and not df_expense.empty:
+    with st.spinner("Thinking..."):
+        context_data = df_expense[['Date', 'Type', 'Amount']].dropna().head(50).to_csv(index=False)
+
+        prompt = f"""
+You are a helpful finance assistant. Given this table of transactions:
+
+{context_data}
+
+Answer the user's question: "{question}"
+"""
+
+        try:
+            response = client.chat.completions.create(
                 model="gpt-3.5-turbo",
                 messages=[{"role": "user", "content": prompt}],
                 temperature=0
             )
+            answer = response.choices[0].message.content.strip()
             st.markdown("**Answer:**")
-            st.write(response.choices[0].message.content.strip())
+            st.write(answer)
 
         except Exception as e:
             st.error(f"Error from OpenAI: {e}")
